@@ -4,10 +4,17 @@
 
 package edu.neu.coe.info6205.util;
 
+import com.google.common.collect.Streams;
+import edu.neu.coe.info6205.sort.elementary.InsertionSort;
+
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static edu.neu.coe.info6205.util.Utilities.formatWhole;
 
@@ -125,4 +132,72 @@ public class Benchmark_Timer<T> implements Benchmark<T> {
     private final Consumer<T> fPost;
 
     final static LazyLogger logger = new LazyLogger(Benchmark_Timer.class);
+
+    public static void main(String[] args) {
+
+        System.out.println("Running this sort, using four different initial array\n");
+        InsertionSort insertionSort  = new InsertionSort();
+        Random randomObject = new Random();
+
+        for(int num = 200; num < 4000; num *=2) {
+            Benchmark_Timer<Integer[]> benchmark_Timer = new Benchmark_Timer<>("Insertion Sort - Randomly Ordered Array", null, (x) -> insertionSort .sort(x, 0, x.length), null);
+            int j = num;
+            Supplier<Integer[]> supplier = () -> {
+                Integer[] arr = new Integer[j];
+                return  Arrays.stream(arr).map(k->randomObject.nextInt(j)).collect(Collectors.toList()).toArray(arr);
+            };
+            double time = benchmark_Timer.runFromSupplier(supplier, 50);
+            System.out.println(" N: " + num + "" + " Time: " + time);
+        }
+        System.out.println("\n");
+
+
+        for(int num = 200; num < 4000; num *=2) {
+            Benchmark_Timer<Integer[]> benchmark_Timer = new Benchmark_Timer<>("Insertion Sort - Ordered Array", null, (x) -> insertionSort .sort(x, 0, x.length), null);
+            int j = num;
+            Supplier<Integer[]> supplier = () -> {
+                Integer[] arr = new Integer[j];
+                return  Arrays.stream(arr).map(k->randomObject.nextInt(j)).sorted().collect(Collectors.toList()).toArray(arr);
+            };
+            double time = benchmark_Timer.runFromSupplier(supplier, 50);
+            System.out.println(" N: " + num + "" + " Time: " + time);
+        }
+        System.out.println("\n");
+
+
+
+        for(int num = 200; num < 4000; num *=2) {
+            Benchmark_Timer<Integer[]> benchmark_Timer = new Benchmark_Timer<>("Insertion Sort - Reverse Ordered Array", null, (x) -> insertionSort .sort(x, 0, x.length), null);
+            int j = num;
+            Supplier<Integer[]> supplier = () -> {
+                Integer[] arr = new Integer[j];
+                return  Arrays.stream(arr).map(k->randomObject.nextInt(j)).sorted(Comparator.reverseOrder()).collect(Collectors.toList()).toArray(arr);
+            };
+            double time = benchmark_Timer.runFromSupplier(supplier, 50);
+            System.out.println(" N: " + num + "" + " Time: " + time);
+        }
+        System.out.println("\n");
+
+
+        for(int num = 200; num < 4000; num *=2) {
+            Benchmark_Timer<Integer[]> benchmark_Timer = new Benchmark_Timer<>("Insertion Sort - Partially Ordered Array", null, (x) -> insertionSort .sort(x, 0, x.length), null);
+            int j = num;
+            Supplier<Integer[]> supplier = () -> {
+                Integer[] arr = new Integer[j];
+                List<Integer> li = Arrays.stream(arr).map(k->randomObject.nextInt(j)).sorted().collect(Collectors.toList());
+
+                List<Integer> l1 = IntStream.range(0, j/2).mapToObj((k) -> li.get(k)).collect(Collectors.toList());
+
+                List<Integer> l2 = IntStream.range(j/2, j).mapToObj((k) -> li.get(k)).collect(Collectors.toList());
+
+                Collections.shuffle(l2);
+
+                return Streams.concat(l1.stream(),l2.stream()).collect(Collectors.toList()).toArray(arr);
+
+            };
+            double time = benchmark_Timer.runFromSupplier(supplier, 50);
+            System.out.println(" N: " + num + "" + " Time: " + time);
+        }
+        System.out.println("\n");
+    }
 }
