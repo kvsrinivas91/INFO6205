@@ -56,7 +56,7 @@ public class Timer {
         logger.trace("repeat: with " + n + " runs");
         // TO BE IMPLEMENTED: note that the timer is running when this method is called and should still be running when it returns.
 
-        while((--n)>0) {
+        while(n--!=0) {
             pause();
             T tVal = supplier.get();
             if(preFunction!=null)  preFunction.apply(tVal);
